@@ -1,0 +1,139 @@
+/* =========================================================
+   Aurora — Leos Polarlicht-Reise · eigene Styles
+   Tailwind übernimmt Layout/Abstände; hier stehen die Dinge,
+   die Tailwind nicht sauber kann: Font, Glow, Slider, Animationen.
+   ========================================================= */
+
+:root {
+  --aurora-glow: #34d399;   /* emerald-400 */
+  --aurora-violet: #a78bfa; /* violet-400  */
+}
+
+* {
+  font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
+}
+
+/* Weicher Neon-Glow für Überschriften und Kennzahlen */
+.glow-text {
+  text-shadow:
+    0 0 20px rgba(52, 211, 153, 0.35),
+    0 0 45px rgba(52, 211, 153, 0.15);
+}
+
+/* Sanftes Scrollen bei Anker-Klicks */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Range-Slider: Thumb glüht in jedem Browser ein wenig */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--aurora-glow);
+  cursor: pointer;
+  box-shadow: 0 0 18px rgba(52, 211, 153, 0.8);
+  transition: transform 0.15s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: var(--aurora-glow);
+  cursor: pointer;
+  box-shadow: 0 0 18px rgba(52, 211, 153, 0.8);
+}
+
+/* Leo wippt leicht auf und ab */
+.leo-bounce {
+  animation: bob 3s ease-in-out infinite;
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+/* KI-Karten faden beim Scrollen ein */
+.fade-in {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.fade-in.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- Quiz ---------- */
+/* Answer buttons: rounded, glowing on hover, clear states */
+.quiz-option {
+  width: 100%;
+  text-align: left;
+  padding: 0.85rem 1.1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+}
+.quiz-option:hover:not(:disabled) {
+  border-color: rgba(52, 211, 153, 0.6);
+  background: rgba(52, 211, 153, 0.06);
+  box-shadow: 0 0 22px -6px rgba(52, 211, 153, 0.7);
+}
+.quiz-option:active:not(:disabled) { transform: scale(0.99); }
+.quiz-option:disabled { cursor: default; }
+
+/* Correct / wrong states after answering */
+.quiz-option.correct {
+  border-color: #34d399;
+  background: rgba(52, 211, 153, 0.14);
+  color: #d1fae5;
+  box-shadow: 0 0 26px -6px rgba(52, 211, 153, 0.8);
+}
+.quiz-option.wrong {
+  border-color: #f87171;
+  background: rgba(248, 113, 113, 0.12);
+  color: #fecaca;
+}
+
+/* AI assistant explanation pops in */
+.quiz-explain {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.4s ease, max-height 0.4s ease;
+}
+.quiz-explain.show {
+  opacity: 1;
+  max-height: 300px;
+}
+
+/* Keyboard focus stays visible */
+.quiz-option:focus-visible {
+  outline: 2px solid #34d399;
+  outline-offset: 2px;
+}
+
+/* Nutzer mit „weniger Bewegung" respektieren */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .fade-in { transition: none; opacity: 1; transform: none; }
+  .leo-bounce { animation: none; }
+  .quiz-explain { transition: none; }
+}

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aurora — Leo's Northern Lights Journey</title>
+  <meta name="description" content="An interactive northern-lights story: follow Leo from Vienna. Drag the Kp slider and watch live how far he has to travel to catch the aurora tonight." />
+
+  <!-- Tailwind via CDN (pinned version): no build step, deploys to Vercel as-is -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-[#05060f] text-slate-100 antialiased overflow-x-hidden">
+
+  <!-- ======================= HERO ======================= -->
+  <header class="relative min-h-screen flex flex-col">
+    <!-- Animated aurora sky, painted in script.js -->
+    <canvas id="sky" class="absolute inset-0 w-full h-full"></canvas>
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#05060f]/40 to-[#05060f] pointer-events-none"></div>
+
+    <!-- Nav -->
+    <nav class="relative z-10 flex items-center justify-between px-6 md:px-12 py-6">
+      <span class="text-lg font-semibold tracking-tight"><span class="text-emerald-300">✦</span> Aurora</span>
+      <a href="#journey" class="text-sm px-4 py-2 rounded-full border border-white/15 hover:border-emerald-300/60 hover:text-emerald-200 transition">Start Leo's journey</a>
+    </nav>
+
+    <!-- Hero copy -->
+    <div class="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6">
+      <span class="mb-5 text-xs md:text-sm uppercase tracking-[0.3em] text-emerald-300/80">An interactive aurora story</span>
+      <h1 class="text-4xl md:text-7xl font-bold leading-[1.05] max-w-4xl glow-text">Leo's lifelong<br />dream.</h1>
+      <p class="mt-6 max-w-xl text-slate-300/90 text-base md:text-lg">Leo from Vienna wants to see the northern lights <em>once in his life</em>. How far he has to travel tonight is up to the sun — and, in a moment, up to you.</p>
+      <a href="#journey" class="mt-9 inline-flex items-center gap-2 px-7 py-3 rounded-full bg-emerald-400 text-[#05060f] font-semibold hover:bg-emerald-300 transition shadow-[0_0_40px_-5px] shadow-emerald-400/60">Turn up the sun ↓</a>
+    </div>
+  </header>
+
+  <!-- ======================= JOURNEY / SIMULATOR ======================= -->
+  <section id="journey" class="relative z-10 px-6 md:px-12 py-20 md:py-24 max-w-6xl mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl md:text-5xl font-bold glow-text">How far must Leo travel?</h2>
+      <p class="mt-4 text-slate-400 max-w-2xl mx-auto">The <strong class="text-emerald-300">Kp index</strong> (0–9) measures how wild the sun is. The higher it goes, the farther south the aurora drifts. Drag the slider — and see what Leo does.</p>
+    </div>
+
+    <div class="grid lg:grid-cols-[1fr_1.1fr] gap-10 items-stretch">
+      <!-- LEFT: Leo + control -->
+      <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-7 md:p-8 backdrop-blur flex flex-col">
+        <!-- Leo's reaction -->
+        <div class="flex items-center gap-5">
+          <div id="leoEmoji" class="text-6xl leo-bounce select-none">😔</div>
+          <div>
+            <div id="leoMood" class="text-lg font-semibold text-emerald-200">Sad on the couch</div>
+            <div id="leoLine" class="text-sm text-slate-400 mt-1">“Nothing in the Vienna sky again tonight…”</div>
+          </div>
+        </div>
+
+        <!-- Slider -->
+        <div class="mt-8">
+          <div class="flex items-end justify-between">
+            <label for="kp" class="text-sm uppercase tracking-widest text-slate-400">Solar activity (Kp)</label>
+            <span class="text-xs text-slate-500">0 = calm · 9 = solar storm</span>
+          </div>
+          <div class="flex items-end gap-3 mt-1">
+            <span id="kpValue" class="text-6xl font-bold text-emerald-300 glow-text">2</span>
+            <span class="text-slate-500 mb-2">/ 9</span>
+          </div>
+          <input id="kp" type="range" min="0" max="9" step="1" value="2" class="w-full mt-4" />
+        </div>
+
+        <!-- Travel plan -->
+        <div class="mt-8 rounded-2xl bg-white/[0.04] border border-white/5 p-5">
+          <div class="text-xs uppercase tracking-widest text-slate-500 mb-2">Leo's travel plan tonight</div>
+          <div id="travelMode" class="text-lg md:text-xl font-semibold text-emerald-200">Flight to Tromsø needed</div>
+          <div class="mt-3 flex items-center justify-between text-sm">
+            <span class="text-slate-400">Distance from Vienna</span>
+            <span id="travelDist" class="text-emerald-300 font-semibold text-base tabular-nums">2,000 km</span>
+          </div>
+          <div class="mt-2 h-2 rounded-full bg-white/10 overflow-hidden">
+            <div id="travelBar" class="h-full bg-gradient-to-r from-emerald-400 to-violet-400 transition-all duration-500" style="width:100%"></div>
+          </div>
+          <div id="travelNote" class="mt-3 text-sm text-slate-400 leading-relaxed">With the sun this calm, the lights stay far up north.</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Europe map -->
+      <div class="relative rounded-3xl overflow-hidden border border-white/10 bg-[#070a1a] min-h-[26rem]">
+        <canvas id="map" class="absolute inset-0 w-full h-full"></canvas>
+        <div class="absolute top-4 left-5 text-xs uppercase tracking-widest text-slate-400/80 pointer-events-none">North → South · where the aurora is visible</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= AI QUIZ ======================= -->
+  <section class="relative z-10 px-6 md:px-12 py-16 md:py-20 max-w-3xl mx-auto">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl md:text-5xl font-bold glow-text">Test your Aurora knowledge 🌌</h2>
+      <p class="mt-4 text-slate-400 max-w-xl mx-auto">Four quick questions. Pick an answer and the AI assistant tells you why — can you earn your spot on Leo's trip to Tromsø?</p>
+    </div>
+
+    <!-- Progress -->
+    <div class="flex items-center justify-between text-xs text-slate-500 mb-3">
+      <span id="quizProgress">Question 1 of 4</span>
+      <span id="quizScore">Score: 0</span>
+    </div>
+    <div class="h-1.5 rounded-full bg-white/10 overflow-hidden mb-8">
+      <div id="quizBar" class="h-full bg-emerald-400 transition-all duration-500" style="width:25%"></div>
+    </div>
+
+    <!-- Quiz card (questions injected by script.js) -->
+    <div id="quizCard" class="rounded-3xl border border-white/10 bg-white/[0.03] p-7 md:p-9 backdrop-blur"></div>
+  </section>
+
+  <!-- ======================= FOOTER ======================= -->
+  <footer class="relative z-10 border-t border-white/10 px-6 md:px-12 py-12">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="text-center md:text-left">
+        <div class="text-lg font-semibold"><span class="text-emerald-300">✦</span> Aurora — Leo's Journey</div>
+        <p class="text-sm text-slate-500 mt-1">A university project — built to show how fast a lively website comes together.</p>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <!-- TODO: replace with your real repo URL -->
+        <a href="https://github.com/your-username/aurora" target="_blank" rel="noopener"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/15 hover:border-emerald-300/60 hover:text-emerald-200 transition text-sm">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          GitHub
+        </a>
+
+        <!-- TODO: replace with your real Vercel URL -->
+        <a href="https://aurora.vercel.app" target="_blank" rel="noopener"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-black hover:bg-slate-200 transition text-sm font-medium">
+          <svg width="16" height="14" viewBox="0 0 76 65" fill="currentColor" aria-hidden="true">
+            <path d="M37.59.25l36.95 64H.64l36.95-64z"/>
+          </svg>
+          Deployed on Vercel
+        </a>
+      </div>
+    </div>
+    <p class="text-center text-xs text-slate-600 mt-8">Forecast values are illustrative and generated client-side for demonstration.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
