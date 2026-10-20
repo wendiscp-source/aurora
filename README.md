@@ -7,6 +7,8 @@ has to travel tonight to catch them.
 Built as a university project to show how quickly a polished, interactive
 site can be created with the help of AI and deployed on the web.
 
+**Live:** https://aurora-nine-eta.vercel.app
+
 ## Features
 
 - **Animated aurora sky** rendered live on an HTML canvas
